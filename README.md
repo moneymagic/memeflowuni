@@ -1,30 +1,78 @@
 # MemeFlow - Sistema de Copy Trading na Blockchain Solana
 
+![MemeFlow Logo](https://hbntevlm.manus.space/favicon.ico)
+
+## Visão Geral
+
 MemeFlow é uma plataforma de copy trading na blockchain Solana que permite aos usuários replicar automaticamente as operações de uma carteira mestre. O sistema utiliza um contrato inteligente para permitir que os seguidores deleguem permissão de negociação à plataforma uma única vez, eliminando a necessidade de assinar cada transação de cópia.
 
-## Características
+## Características Principais
 
-- **Delegação única de autoridade**: Os usuários assinam apenas uma vez para autorizar a plataforma a operar em seu nome
+- **Delegação única de autoridade**: Os usuários assinam apenas uma vez para autorizar a plataforma
 - **Copy trading automático**: Replicação automática das operações da carteira mestre
 - **Integração com Jupiter**: Execução de swaps otimizados via Jupiter
-- **Sistema de comissões**: Distribuição de taxas entre plataforma e rede de afiliados
+- **Sistema de comissões baseado em lucro**: Distribuição de taxas entre plataforma e rede de afiliados
 - **Interface minimalista**: Design inspirado no estilo Jonathan Ive e Phantom Wallet
 
-## Estrutura do Projeto
+## Arquitetura Otimizada
 
-O projeto é dividido em três componentes principais:
+O código foi completamente refatorado para eliminar redundâncias e centralizar a lógica de negócio:
 
-1. **Contrato Inteligente (On-chain)**: Programa Solana desenvolvido com Anchor que gerencia delegações e executa swaps via Jupiter
-2. **Backend (Off-chain)**: Serviços que monitoram operações do master trader, calculam proporções e lucros, e orquestram a execução de swaps delegados
-3. **Frontend**: Interface para usuários delegarem autorização, visualizarem operações e gerenciarem suas configurações
+### 1. Serviços Centralizados
 
-## Pré-requisitos
+- **CommissionService**: Toda a lógica de comissões e ranking em um único serviço
+- **SupabaseService**: Chamadas ao backend centralizadas para evitar duplicação
+
+### 2. Hooks Unificados
+
+- **useNetworkData**: Dados de rede, comissões e ranking em um único hook
+- **useCommissionTester**: Testes funcionais para validar a lógica de comissões
+
+### 3. Componentes Refatorados
+
+- Interface simplificada e focada na usabilidade
+- Componentes reutilizáveis e bem documentados
+
+## Sistema de Comissões e Ranking
+
+### Distribuição do Lucro
+
+- 30% do lucro é retido como taxa (10% para master trader, 20% para rede)
+- 70% do lucro permanece com o seguidor
+
+### Distribuição na Rede
+
+- Cada ranking (V1-V8) tem um percentual máximo de comissão
+- A distribuição segue um sistema diferencial onde cada upline recebe a diferença entre seu percentual e o do upline abaixo
+- O residual vai para a plataforma
+
+### Progressão de Ranking
+
+- Baseada no **lucro da rede**, não no volume de transações
+- Cada ranking tem requisitos de lucro da rede e estrutura
+
+### Percentuais por Ranking
+
+| Ranking | Percentual |
+|---------|------------|
+| V1      | 2%         |
+| V2      | 4%         |
+| V3      | 6%         |
+| V4      | 8%         |
+| V5      | 12%        |
+| V6      | 14%        |
+| V7      | 16%        |
+| V8      | 20%        |
+
+## Instalação e Uso
+
+### Pré-requisitos
 
 - Node.js 20+
 - Solana CLI 1.18+
 - Anchor 0.29+ (para desenvolvimento do contrato)
 
-## Configuração
+### Configuração
 
 1. Clone o repositório:
 ```
@@ -46,7 +94,7 @@ VITE_MEMEFLOW_PROGRAM_ID="HX3Ex4icMLJFwqSDJ9vsLe87ZNd7UyrBxPiUHj78rKLm"
 VITE_JUPITER_PROGRAM_ID="JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4"
 ```
 
-## Desenvolvimento
+### Desenvolvimento
 
 Para iniciar o ambiente de desenvolvimento:
 
@@ -54,7 +102,7 @@ Para iniciar o ambiente de desenvolvimento:
 npm run dev
 ```
 
-## Build
+### Build
 
 Para compilar o projeto para produção:
 
@@ -79,35 +127,11 @@ cd memeflow_contract
 anchor build
 ```
 
-## Fluxo de Operação
+## Acesso Online
 
-1. **Delegação de Autoridade (Única)**
-   - O usuário acessa a plataforma e configura quanto deseja alocar para copy trading
-   - O sistema gera uma transação de delegação que o usuário assina com sua carteira
-   - Esta transação cria uma conta `DelegatedAuthority` associada ao usuário
+O site está disponível em:
 
-2. **Monitoramento e Cópia de Trades**
-   - O backend monitora continuamente as operações da carteira mestre
-   - Quando uma operação lucrativa é detectada, o sistema executa swaps proporcionais para todos os seguidores
-
-3. **Execução de Swaps Delegados**
-   - Para cada seguidor, o backend obtém cotação do Jupiter e executa o swap via contrato inteligente
-   - O contrato verifica a delegação e executa o swap via CPI para o Jupiter
-
-4. **Cálculo de Lucro e Taxas**
-   - Após cada swap bem-sucedido, o sistema calcula o lucro e distribui as comissões
-
-## Segurança
-
-- A chave privada do `swap_executor_authority` deve ser mantida em segurança extrema
-- O contrato valida rigorosamente as contas e autoridades em cada instrução
-- A instrução `execute_swap` só pode operar em nome de usuários com delegação ativa
-
-## Limitações
-
-- A delegação é por token, então múltiplos tokens requerem múltiplas delegações
-- O contrato usa CPI manual para Jupiter devido a limitações de compatibilidade de dependências
-- O slippage deve ser configurado adequadamente para evitar falhas em mercados voláteis
+**[https://hbntevlm.manus.space](https://hbntevlm.manus.space)**
 
 ## Contribuição
 
